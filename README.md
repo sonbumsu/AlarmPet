@@ -39,7 +39,7 @@
 
 ## 1. 준비물
 
-- **macOS 14 (Sonoma) 이상** (macOS 26에서 확인했어요)
+- **macOS 14 (Sonoma) 이상** (macOS 26 + Command Line Tools(Swift 6.4)에서 확인했어요. 그보다 오래된 환경은 아직 테스트하지 못했어요)
 - **Xcode Command Line Tools**: Xcode 앱은 필요 없어요.
 - 터미널 사용이 조금 필요해요. 명령어는 아래에 그대로 복사해서 붙여넣으면 돼요.
 
@@ -59,11 +59,14 @@ xcode-select --install
 
 ### ② 알림펫 코드 받기
 
-이 폴더를 원하는 위치에 두고, 터미널에서 그 폴더로 이동해요.
-
 ```bash
-cd ~/원하는/위치/알림펫
+git clone https://github.com/sonbumsu/AlarmPet.git
+cd AlarmPet
 ```
+
+git이 없다면 [GitHub 페이지](https://github.com/sonbumsu/AlarmPet)에서 **Code → Download ZIP**으로 받아 압축을 풀고, 터미널에서 그 폴더로 이동해도 돼요 (`cd ~/Downloads/AlarmPet-main`).
+
+> 아래 명령에서 `permission denied`가 나오면 앞에 `bash`를 붙여서 실행하세요. 예) `bash build.sh --run`
 
 ### ③ 서명 인증서 만들기 (처음 한 번, 권장)
 
