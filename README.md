@@ -321,7 +321,8 @@ npm run build && curl -X POST localhost:7777/say -d '{"app":"터미널","body":"
 3. 한 번 추가한 소리는 모든 펫의 소리 목록 **"내 소리"** 칸에 나와요.
 
 - 파일은 알림펫 폴더(`~/Library/Application Support/AlarmPet/Sounds`)에 복사돼요. 그래서 원본 파일을 옮기거나 지워도 계속 울려요.
-- 알람으로 쓰면 끄기 전까지 처음부터 계속 반복해요. 알림 소리로 쓰면 말풍선이 떠 있는 동안만 나와요.
+- 알람으로 쓰면 파일을 **끝까지 다 들려준 다음 처음부터 다시** 재생해요. 끄기 전까지 계속 반복해요 (10분 동안 안 끄면 "놓친 알람"이 돼요).
+- 알림 소리로 쓰면 말풍선이 떠 있는 동안만 나와요. 설정 창의 🔊 미리 듣기도 8초까지만 들려줘요. 전체를 들어 보려면 **[알람 테스트]**를 누르세요.
 - 내 소리를 고른 상태에서 **[‘이름’ 삭제]**를 누르면 목록에서 지워져요. 그 소리를 쓰던 다른 펫은 기본 소리로 울려요.
 
 > 맥 전체 음량이 꺼져 있으면 알람도 안 들려요.
@@ -419,6 +420,5 @@ security delete-identity -c "AlarmPet Dev" ~/Library/Keychains/login.keychain-db
 
 ## 만든 것들
 
-- 펫 표시·재생은 [bssm-oss/desktop-pet](https://github.com/bssm-oss/desktop-pet) (MIT)을 바탕으로 했어요.
 - 라이선스: [MIT](LICENSE)
 - 개발 명세서: [docs/SPEC.md](docs/SPEC.md)

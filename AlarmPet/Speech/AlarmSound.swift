@@ -26,10 +26,12 @@ enum AlarmSound {
         return cache[name].flatMap { NSSound(data: $0) }
     }
 
-    /// Seconds between repeats.
-    static func period(of name: String) -> TimeInterval {
-        let duration = makeSound(name)?.duration ?? 1
-        return builtIn.contains(name) ? duration : max(duration + 0.35, 1)
+    /// Silence between the end of one play and the start of the next.
+    /// Built-in patterns already end with their pause; your own files repeat right away;
+    /// short system sounds get a short pause (at least 1 s per repeat).
+    static func gap(after name: String, duration: TimeInterval) -> TimeInterval {
+        if builtIn.contains(name) || CustomSounds.isCustom(name) { return 0 }
+        return max(0.35, 1 - duration)
     }
 
     /// Play one period (settings preview). Long custom files are cut off after a few seconds.
@@ -97,17 +99,21 @@ enum AlarmSound {
 }
 
 /// Plays an alarm sound on repeat until stopped, ramping the volume up over the first seconds.
-final class AlarmPlayer {
+/// Each play runs to its real end (NSSound tells us when it finishes) before the next one starts,
+/// so a long voice file is never cut off — `duration` can be off for compressed files like mp3.
+final class AlarmPlayer: NSObject, NSSoundDelegate {
 
     private enum Constants {
         static let startVolumeRatio = 0.35
         static let rampDuration: TimeInterval = 20
+        static let rampStep: TimeInterval = 0.5
     }
 
     private let soundName: String
     private let volume: Double
-    private var timer: Timer?
     private var current: NSSound?
+    private var rampTimer: Timer?
+    private var next: DispatchWorkItem?
     private var startedAt = Date()
 
     init(soundName: String, volume: Double) {
@@ -115,30 +121,50 @@ final class AlarmPlayer {
         self.volume = min(max(volume, 0.05), 1)
     }
 
-    var isPlaying: Bool { timer != nil }
+    var isPlaying: Bool { rampTimer != nil }
 
     func start() {
         stop()
         startedAt = Date()
-        playOnce()
-        timer = Timer.scheduledTimer(withTimeInterval: AlarmSound.period(of: soundName), repeats: true) { [weak self] _ in
-            self?.playOnce()
+        rampTimer = Timer.scheduledTimer(withTimeInterval: Constants.rampStep, repeats: true) { [weak self] _ in
+            self?.applyVolume()
         }
+        playOnce()
     }
 
     func stop() {
-        timer?.invalidate()
-        timer = nil
+        rampTimer?.invalidate()
+        rampTimer = nil
+        next?.cancel()
+        next = nil
+        current?.delegate = nil
         current?.stop()
         current = nil
     }
 
     private func playOnce() {
+        guard isPlaying, let sound = AlarmSound.makeSound(soundName) else { return }
+        current = sound
+        sound.delegate = self
+        applyVolume()
+        if !sound.play() { scheduleNext(after: 1) }   // never go silent because one play failed
+    }
+
+    /// Volume follows the ramp continuously, also in the middle of a long file.
+    private func applyVolume() {
         let ramp = min(Date().timeIntervalSince(startedAt) / Constants.rampDuration, 1)
-        let level = volume * (Constants.startVolumeRatio + (1 - Constants.startVolumeRatio) * ramp)
-        current?.stop()
-        current = AlarmSound.makeSound(soundName)
-        current?.volume = Float(level)
-        current?.play()
+        current?.volume = Float(volume * (Constants.startVolumeRatio + (1 - Constants.startVolumeRatio) * ramp))
+    }
+
+    private func scheduleNext(after delay: TimeInterval) {
+        next?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.playOnce() }
+        next = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+    }
+
+    func sound(_ sound: NSSound, didFinishPlaying finished: Bool) {
+        guard sound === current, isPlaying else { return }
+        scheduleNext(after: AlarmSound.gap(after: soundName, duration: sound.duration))
     }
 }

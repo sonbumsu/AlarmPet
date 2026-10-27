@@ -58,14 +58,22 @@ struct AlarmBubbleView: View {
         .background(
             BubbleShape(tailOnBottom: layout.tailOnBottom, tailX: layout.tailX, size: size)
                 .fill(Color(nsColor: SpeechBubbleView.bubbleColor))
-                .shadow(color: .orange.opacity(missed ? 0.25 : 0.6), radius: 7)
+                .shadow(color: .orange.opacity(glowOpacity), radius: 7)
+                // Scoped to the background: a repeatForever started with withAnimation in onAppear
+                // also catches the first layout pass, and the text/buttons would wobble forever.
+                .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: motion.pulse)
         )
         .padding(m.margin)
-        .scaleEffect(motion.pulse && !missed ? 1.03 : 1, anchor: layout.tailOnBottom ? .bottom : .top)
+        // The bubble itself stays still (easy to read and click); only the glow breathes.
         .onAppear {
             guard layout.animated, !missed else { return }
-            withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { motion.pulse = true }
+            DispatchQueue.main.async { motion.pulse = true }
         }
+    }
+
+    private var glowOpacity: Double {
+        if missed { return 0.25 }
+        return motion.pulse ? 0.8 : 0.35
     }
 
     /// Room for the bubble at its widest (used to measure wrapping).
