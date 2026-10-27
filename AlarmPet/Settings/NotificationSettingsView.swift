@@ -90,6 +90,21 @@ struct NotificationSettingsView: View {
                     .font(.caption2)
                     .foregroundColor(.secondary)
             }
+
+            Divider()
+
+            // ── GIFs ─────────────────────────────────────────────────────
+            Header("움짤")
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Klipy API 키 (디스코드 klipy.com 움짤용)")
+                    .font(.caption).foregroundColor(.secondary)
+                SecureField("비워두면 링크 글자로 보여요", text: $settings.klipyAPIKey)
+                    .textFieldStyle(.roundedBorder)
+                Text("docs.klipy.com에서 받을 수 있어요.")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+            }
         }
         .padding(16)
         .frame(width: 320)

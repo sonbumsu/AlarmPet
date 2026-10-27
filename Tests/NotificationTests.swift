@@ -63,6 +63,15 @@ func notificationTests() {
     Check.that(MediaLink.find(in: "https://github.com/sonbumsu/AlarmPet 그리고 https://tenor.com/search/cat").isEmpty, "ordinary links stay links")
     Check.that(MediaLink.directURL(for: URL(string: "https://giphy.com/gifs/ai-cat-meme-774uK11mxE3W0cjE8L")!).absoluteString
                == "https://media.giphy.com/media/774uK11mxE3W0cjE8L/200.gif", "Giphy page → direct gif")
+    let klipy = URL(string: "https://klipy.com/gifs/-33785")!
+    Check.that(MediaLink.find(in: "<\(klipy.absoluteString)>") == [klipy], "finds a Klipy link")
+    Check.that(MediaLink.find(in: "https://klipy.com/gifs").isEmpty, "Klipy list page stays a link")
+    Check.that(MediaLink.klipyAPIURL(for: klipy, key: " KEY\n")?.absoluteString
+               == "https://api.klipy.com/api/v1/KEY/gifs/-33785", "Klipy link → API URL")
+    Check.that(MediaLink.klipyAPIURL(for: klipy, key: "") == nil, "no Klipy key → no API call")
+    let klipyJSON = #"{"result":true,"data":{"slug":"-33785","file":{"hd":{"gif":{"url":"https://static.klipy.com/hd.gif"}},"md":{"gif":{"url":"https://static.klipy.com/md.gif"}}}}}"#
+    Check.that(MediaLink.klipyGIF(inJSON: Data(klipyJSON.utf8))?.absoluteString == "https://static.klipy.com/md.gif", "Klipy reply → md gif")
+    Check.that(MediaLink.klipyGIF(inJSON: Data(#"{"result":false,"data":[]}"#.utf8)) == nil, "Klipy not found → nil")
     let html = #"<meta class="dynamic" name="twitter:image" content="https://x/t.gif"><meta class="dynamic" property="og:image" content="https://media1.tenor.com/m/a/cat.gif?a=1&amp;b=2">"#
     Check.that(MediaLink.previewImage(inHTML: html)?.absoluteString == "https://media1.tenor.com/m/a/cat.gif?a=1&b=2", "og:image wins, any attribute order")
 

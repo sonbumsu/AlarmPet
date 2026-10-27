@@ -29,6 +29,10 @@ final class NotificationSettings: ObservableObject {
     /// Close the original macOS banner when the pet says it instead.
     @Published var hideOriginalBanners: Bool { didSet { save(hideOriginalBanners, "hideOriginalBanners") } }
 
+    // MARK: - GIFs
+    /// Klipy API key, to show Discord's klipy.com GIF links. Empty = show the link as text.
+    @Published var klipyAPIKey: String     { didSet { save(klipyAPIKey, "klipyAPIKey") } }
+
     // MARK: - Init
 
     init(defaults: UserDefaults = .standard) {
@@ -47,6 +51,7 @@ final class NotificationSettings: ObservableObject {
         localServerPort = defaults.integer(forKey: "localServerPort")
         systemNotificationsEnabled = defaults.bool(forKey: "systemNotificationsEnabled")
         hideOriginalBanners = defaults.bool(forKey: "hideOriginalBanners")
+        klipyAPIKey = defaults.string(forKey: "klipyAPIKey") ?? ""
     }
 
     private func save(_ value: Any, _ key: String) {

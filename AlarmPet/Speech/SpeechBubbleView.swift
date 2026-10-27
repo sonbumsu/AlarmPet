@@ -2,7 +2,7 @@
 // The speech bubble drawn above (or below) the pet.
 //
 //   집가고싶어ㅠㅠ                 ← body, large (up to 3 lines)
-//   [GIF]                           ← when the body had a Tenor/Giphy/.gif link
+//   [GIF]                           ← when the body had a Tenor/Giphy/Klipy/.gif link
 //   [icon] 카카오톡       - 손범수  ← footer, small grey: app on the left, sender on the right
 
 import SwiftUI
@@ -16,7 +16,8 @@ struct SpeechBubbleView: View {
         static let footerFontSize: CGFloat = 11
         static let footerSpacing: CGFloat = 4
         static let maxTextWidth: CGFloat = 280
-        static let maxMediaHeight: CGFloat = 160
+        static let maxMediaWidth: CGFloat = 200
+        static let maxMediaHeight: CGFloat = 120
         static let mediaCornerRadius: CGFloat = 6
         static let horizontalPadding: CGFloat = 12
         static let verticalPadding: CGFloat = 8
@@ -103,12 +104,12 @@ struct SpeechBubbleView: View {
         return false
     }
 
-    /// Fit inside the text column and a max height; small GIFs are enlarged up to 2×.
+    /// Fit inside a max width and height; small GIFs are enlarged up to 1.5×.
     private func mediaSize(_ pixels: CGSize) -> CGSize {
         guard pixels.width > 0, pixels.height > 0 else { return .zero }
-        let scale = min(Metrics.maxTextWidth * size / pixels.width,
+        let scale = min(Metrics.maxMediaWidth * size / pixels.width,
                         Metrics.maxMediaHeight * size / pixels.height,
-                        2)
+                        1.5)
         return CGSize(width: (pixels.width * scale).rounded(), height: (pixels.height * scale).rounded())
     }
 

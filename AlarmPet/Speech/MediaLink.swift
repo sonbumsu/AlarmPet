@@ -1,5 +1,5 @@
 // MediaLink.swift
-// Finds GIF / image links in a notification body (Tenor, Giphy, or a direct .gif/.png/... file)
+// Finds GIF / image links in a notification body (Tenor, Giphy, Klipy, or a direct .gif/.png/... file)
 // so the bubble can show the picture instead of the raw link.
 
 import Foundation
@@ -34,7 +34,40 @@ enum MediaLink {
         if imageExtensions.contains(url.pathExtension.lowercased()) { return true }
         if (host == "tenor.com" || host.hasSuffix(".tenor.com")) && url.path.hasPrefix("/view/") { return true }
         if (host == "giphy.com" || host == "www.giphy.com") && url.path.hasPrefix("/gifs/") { return true }
+        if isKlipy(url) { return true }
         return false
+    }
+
+    /// klipy.com/gifs/<slug> — Discord's GIF picker. The page is behind a bot check,
+    /// so the GIF comes from Klipy's API instead (needs the user's API key).
+    static func isKlipy(_ url: URL) -> Bool {
+        let host = url.host?.lowercased() ?? ""
+        return (host == "klipy.com" || host == "www.klipy.com") && url.path.hasPrefix("/gifs/")
+            && url.pathComponents.count == 3
+    }
+
+    /// klipy.com/gifs/-33785 → api.klipy.com/api/v1/<key>/gifs/-33785
+    static func klipyAPIURL(for url: URL, key: String) -> URL? {
+        let key = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard isKlipy(url), !key.isEmpty,
+              let slug = url.lastPathComponent.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed),
+              let key = key.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return nil }
+        return URL(string: "https://api.klipy.com/api/v1/\(key)/gifs/\(slug)")
+    }
+
+    /// The GIF file in a Klipy API reply: `data.file.<size>.gif.url`, medium size first.
+    static func klipyGIF(inJSON data: Data) -> URL? {
+        guard let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              root["result"] as? Bool == true,
+              let item = root["data"] as? [String: Any],
+              let files = item["file"] as? [String: Any] else { return nil }
+        for size in ["md", "sm", "hd", "xs"] {
+            if let gif = (files[size] as? [String: Any])?["gif"] as? [String: Any],
+               let string = gif["url"] as? String, let url = URL(string: string) {
+                return url
+            }
+        }
+        return nil
     }
 
     /// Where the picture itself can be downloaded from without opening the page first.

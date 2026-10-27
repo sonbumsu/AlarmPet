@@ -36,12 +36,28 @@ enum BubbleMedia {
     /// Calls back on the main thread with the picture, or nil if it couldn't be loaded.
     static func load(_ link: URL, completion: @escaping (BubbleGIF?) -> Void) {
         if let hit = cache[link] { return completion(hit) }
-        fetch(MediaLink.directURL(for: link), followPage: true) { gif in
+        let done: (BubbleGIF?) -> Void = { gif in
             DispatchQueue.main.async {
                 if let gif { remember(gif, for: link) }
                 completion(gif)
             }
         }
+        if MediaLink.isKlipy(link) {
+            guard let api = MediaLink.klipyAPIURL(for: link, key: NotificationSettings.shared.klipyAPIKey) else {
+                return completion(nil)   // no API key: keep the link as text
+            }
+            return fetchKlipy(api, completion: done)
+        }
+        fetch(MediaLink.directURL(for: link), followPage: true, completion: done)
+    }
+
+    /// Asks Klipy's API where the GIF file is, then downloads it.
+    private static func fetchKlipy(_ api: URL, completion: @escaping (BubbleGIF?) -> Void) {
+        URLSession.shared.dataTask(with: URLRequest(url: api, timeoutInterval: Constants.timeout)) { data, response, _ in
+            guard let data, (response as? HTTPURLResponse)?.statusCode ?? 200 < 400,
+                  let gif = MediaLink.klipyGIF(inJSON: data) else { return completion(nil) }
+            fetch(gif, followPage: false, completion: completion)
+        }.resume()
     }
 
     private static func fetch(_ url: URL, followPage: Bool, completion: @escaping (BubbleGIF?) -> Void) {
