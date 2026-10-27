@@ -45,6 +45,10 @@ final class OverlayWindowController: NSWindowController {
     private var naturalSize: NSSize = NSSize(width: 200, height: 200)
     /// Center to use for the next layout triggered by a scale change (corner-handle resize).
     private var pendingCenter: NSPoint?
+    /// The pet's exact center. Re-layouts (rotate, resize) keep it instead of re-reading window.frame:
+    /// AppKit rounds window origins to whole points, and reading the center back after every
+    /// 1° step made the pet creep toward the bottom-left while rotating.
+    private var petCenter: NSPoint = .zero
     private var mouseMonitors: [Any] = []
 
     // MARK: - Init
@@ -53,6 +57,7 @@ final class OverlayWindowController: NSWindowController {
         self.settings = settings
 
         let center = settings.savedPosition()
+        petCenter = center
         let rect = NSRect(x: center.x - 100, y: center.y - 100, width: 200, height: 200)
         let window = OverlayWindow(contentRect: rect)
         window.acceptsMouseMovedEvents = true
@@ -321,7 +326,8 @@ final class OverlayWindowController: NSWindowController {
 
         let pad = PetView.Metrics.padding
         let size = NSSize(width: ceil(boxW + pad * 2), height: ceil(boxH + pad * 2))
-        let c = center ?? NSPoint(x: window.frame.midX, y: window.frame.midY)
+        let c = center ?? petCenter
+        petCenter = c
         window.setFrame(NSRect(x: c.x - size.width / 2, y: c.y - size.height / 2,
                                width: size.width, height: size.height),
                         display: true, animate: false)
@@ -383,7 +389,10 @@ extension OverlayWindowController: PetViewDelegate {
 
     func petViewDidFinishDrag(_ view: PetView) {
         guard let window else { return }
-        settings.savePosition(NSPoint(x: window.frame.midX, y: window.frame.midY))
+        // Only a real move changes the center; after a zoom step the frame differs just by rounding.
+        let frameCenter = NSPoint(x: window.frame.midX, y: window.frame.midY)
+        if hypot(frameCenter.x - petCenter.x, frameCenter.y - petCenter.y) > 1 { petCenter = frameCenter }
+        settings.savePosition(petCenter)
     }
 
     func petView(_ view: PetView, requestScale scale: Double, center: NSPoint?) {
