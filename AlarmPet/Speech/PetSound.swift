@@ -1,7 +1,7 @@
 // PetSound.swift
 // Cute "the pet is talking" sound effects.
 // Built-in sounds are synthesized in code (no audio files to ship);
-// macOS system sounds (/System/Library/Sounds) can be picked too.
+// macOS system sounds (/System/Library/Sounds) and the user's own files (CustomSounds) can be picked too.
 
 import AppKit
 
@@ -21,15 +21,23 @@ enum PetSound {
     /// NSSound stops when deallocated, so keep the one that is playing.
     private static var playing: NSSound?
 
-    static func play(_ name: String, volume: Double) {
+    /// `maxDuration` cuts off long custom files (a whole song as a notification sound).
+    static func play(_ name: String, volume: Double, maxDuration: TimeInterval? = nil) {
         guard !name.isEmpty, let sound = makeSound(name) else { return }
         playing?.stop()
         sound.volume = Float(min(max(volume, 0), 1))
         sound.play()
         playing = sound
+        if let maxDuration, sound.duration > maxDuration {
+            DispatchQueue.main.asyncAfter(deadline: .now() + maxDuration) { [weak sound] in sound?.stop() }
+        }
     }
 
     private static func makeSound(_ name: String) -> NSSound? {
+        if CustomSounds.isCustom(name) {
+            // File deleted → fall back to a built-in sound rather than going silent.
+            return CustomSounds.shared.makeSound(name) ?? makeSound(builtIn[0])
+        }
         guard builtIn.contains(name) else { return NSSound(named: NSSound.Name(name)) }
         if cache[name] == nil { cache[name] = synthesize(name) }
         return cache[name].flatMap { NSSound(data: $0) }

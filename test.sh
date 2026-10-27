@@ -13,8 +13,10 @@ SOURCES=(
   AlarmPet/Settings/AppSettings.swift
   AlarmPet/Settings/NotificationSettings.swift
   AlarmPet/Speech/PetMessage.swift
+  AlarmPet/Speech/MediaLink.swift
   AlarmPet/Speech/PetSound.swift
   AlarmPet/Speech/AlarmSound.swift
+  AlarmPet/Speech/CustomSounds.swift
   AlarmPet/Sources/NotificationSource.swift
   AlarmPet/Sources/LocalServerSource.swift
   AlarmPet/Utilities/AppDirectory.swift

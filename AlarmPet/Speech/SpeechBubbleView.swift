@@ -2,6 +2,7 @@
 // The speech bubble drawn above (or below) the pet.
 //
 //   집가고싶어ㅠㅠ                 ← body, large (up to 3 lines)
+//   [GIF]                           ← when the body had a Tenor/Giphy/.gif link
 //   [icon] 카카오톡       - 손범수  ← footer, small grey: app on the left, sender on the right
 
 import SwiftUI
@@ -15,6 +16,8 @@ struct SpeechBubbleView: View {
         static let footerFontSize: CGFloat = 11
         static let footerSpacing: CGFloat = 4
         static let maxTextWidth: CGFloat = 280
+        static let maxMediaHeight: CGFloat = 160
+        static let mediaCornerRadius: CGFloat = 6
         static let horizontalPadding: CGFloat = 12
         static let verticalPadding: CGFloat = 8
         static let tailHeight: CGFloat = 10
@@ -30,6 +33,7 @@ struct SpeechBubbleView: View {
     }
 
     let message: PetMessage
+    var media: BubbleMediaState = .none
     var tailOnBottom: Bool = true
     /// Tail tip x, measured from the bubble shape's leading edge.
     var tailX: CGFloat = 0
@@ -42,12 +46,21 @@ struct SpeechBubbleView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Metrics.footerSpacing * size) {
-            Text(styledBody)
-                .font(.system(size: Metrics.fontSize * size))
-                .lineLimit(3)
-                .truncationMode(.tail)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
+            if let text = displayedText {
+                Text(styled(text))
+                    .font(.system(size: Metrics.fontSize * size))
+                    .foregroundStyle(isLoadingPlaceholder ? .secondary : .primary)
+                    .lineLimit(3)
+                    .truncationMode(.tail)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            if case .loaded(let gif) = media {
+                let fitted = mediaSize(gif.pixelSize)
+                AnimatedImage(gif: gif)
+                    .frame(width: fitted.width, height: fitted.height)
+                    .clipShape(RoundedRectangle(cornerRadius: Metrics.mediaCornerRadius * size))
+            }
             footer
         }
             .frame(maxWidth: Metrics.maxTextWidth * size, alignment: .leading)
@@ -69,10 +82,40 @@ struct SpeechBubbleView: View {
             .onTapGesture(perform: onTap)
     }
 
+    /// The text line(s): without the GIF link once the GIF is shown, the whole body if it couldn't load.
+    private var displayedText: String? {
+        switch media {
+        case .none, .failed:
+            return message.body
+        case .loaded:
+            let rest = MediaLink.removing(from: message.body)
+            return rest.isEmpty ? nil : rest
+        case .loading:
+            let rest = MediaLink.removing(from: message.body)
+            return rest.isEmpty ? Self.loadingText : rest
+        }
+    }
+
+    private static let loadingText = "🎞️ 움짤 불러오는 중…"
+
+    private var isLoadingPlaceholder: Bool {
+        if case .loading = media { return displayedText == Self.loadingText }
+        return false
+    }
+
+    /// Fit inside the text column and a max height; small GIFs are enlarged up to 2×.
+    private func mediaSize(_ pixels: CGSize) -> CGSize {
+        guard pixels.width > 0, pixels.height > 0 else { return .zero }
+        let scale = min(Metrics.maxTextWidth * size / pixels.width,
+                        Metrics.maxMediaHeight * size / pixels.height,
+                        2)
+        return CGSize(width: (pixels.width * scale).rounded(), height: (pixels.height * scale).rounded())
+    }
+
     /// Discord/Slack send inline markdown (**굵게**, _기울임_) — show it styled instead of raw asterisks.
-    private var styledBody: AttributedString {
+    private func styled(_ text: String) -> AttributedString {
         let options = AttributedString.MarkdownParsingOptions(interpretedSyntax: .inlineOnlyPreservingWhitespace)
-        return (try? AttributedString(markdown: message.body, options: options)) ?? AttributedString(message.body)
+        return (try? AttributedString(markdown: text, options: options)) ?? AttributedString(text)
     }
 
     private var footer: some View {

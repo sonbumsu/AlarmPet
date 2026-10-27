@@ -23,11 +23,19 @@ extension PetMessage {
         return "\(app): \(body)"
     }
 
-    /// What TTS reads out loud.
+    /// GIF / image links in the body (shown as a picture in the bubble).
+    var mediaLinks: [URL] { MediaLink.find(in: body) }
+
+    /// What TTS reads out loud. GIF links are read as "움짤", not letter by letter.
     var spokenText: String {
-        if let sender, !sender.isEmpty {
-            return "\(app), \(sender). \(body)"
+        var said = body
+        if !mediaLinks.isEmpty {
+            said = MediaLink.removing(from: body)
+            if said.isEmpty { said = "움짤" }
         }
-        return "\(app). \(body)"
+        if let sender, !sender.isEmpty {
+            return "\(app), \(sender). \(said)"
+        }
+        return "\(app). \(said)"
     }
 }

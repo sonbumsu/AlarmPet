@@ -22,6 +22,7 @@ struct SettingsView: View {
     var onTestAlarm: () -> Void
 
     @StateObject private var draft = ReminderDraft()
+    @ObservedObject private var customSounds = CustomSounds.shared
 
     var body: some View {
         TabView(selection: $tabs.selected) {
@@ -174,9 +175,10 @@ struct SettingsView: View {
                         Section("macOS 기본 소리") {
                             ForEach(PetSound.system, id: \.self) { Text($0).tag($0) }
                         }
+                        customSoundSection
                     }
                     Button {
-                        PetSound.play(settings.soundName, volume: settings.soundVolume)
+                        PetSound.play(settings.soundName, volume: settings.soundVolume, maxDuration: AlarmSound.previewLimit)
                     } label: {
                         Image(systemName: "speaker.wave.2.fill")
                     }
@@ -185,8 +187,10 @@ struct SettingsView: View {
                     .help("미리 듣기")
                 }
                 .onChange(of: settings.soundName) { _, name in
-                    PetSound.play(name, volume: settings.soundVolume)
+                    PetSound.play(name, volume: settings.soundVolume, maxDuration: AlarmSound.previewLimit)
                 }
+
+                customSoundButtons(selection: $settings.soundName, fallback: PetSound.builtIn[0])
 
                 if !settings.soundName.isEmpty {
                     HStack {
@@ -357,6 +361,7 @@ struct SettingsView: View {
                     Section("macOS 기본 소리") {
                         ForEach(AlarmSound.system, id: \.self) { Text($0).tag($0) }
                     }
+                    customSoundSection
                 }
                 Button {
                     AlarmSound.playPreview(settings.alarmSoundName, volume: settings.alarmVolume)
@@ -370,6 +375,8 @@ struct SettingsView: View {
                 AlarmSound.playPreview(name, volume: settings.alarmVolume)
             }
 
+            customSoundButtons(selection: $settings.alarmSoundName, fallback: AlarmSound.defaultName)
+
             HStack {
                 Image(systemName: "speaker.fill").font(.caption).foregroundColor(.secondary)
                 Slider(value: $settings.alarmVolume, in: 0.1...1)
@@ -382,6 +389,34 @@ struct SettingsView: View {
             Button("알람 테스트 (지금 울리기)", action: onTestAlarm)
                 .controlSize(.small)
         }
+    }
+
+    // MARK: - 내 소리 (shared by both sound pickers)
+
+    @ViewBuilder
+    private var customSoundSection: some View {
+        if !customSounds.names.isEmpty {
+            Section("내 소리") {
+                ForEach(customSounds.names, id: \.self) { Text(CustomSounds.displayName($0)).tag($0) }
+            }
+        }
+    }
+
+    /// [내 소리 추가…] — and [삭제] while one of the user's files is selected.
+    private func customSoundButtons(selection: Binding<String>, fallback: String) -> some View {
+        HStack {
+            Button("내 소리 추가…") {
+                if let name = customSounds.pickAndImport() { selection.wrappedValue = name }
+            }
+            if CustomSounds.isCustom(selection.wrappedValue) {
+                Button("‘\(CustomSounds.displayName(selection.wrappedValue))’ 삭제") {
+                    customSounds.remove(selection.wrappedValue)
+                    selection.wrappedValue = fallback
+                }
+                .help("내 소리 목록에서 지워요. 이 소리를 쓰던 다른 펫은 기본 소리로 울려요.")
+            }
+        }
+        .controlSize(.small)
     }
 }
 

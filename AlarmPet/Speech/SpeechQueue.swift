@@ -110,6 +110,7 @@ final class PetSpeaker {
     init(pet: OverlayWindowController) {
         self.pet = pet
         bubble.onTap = { [weak self] in self?.finishCurrent() }
+        bubble.onMediaLoaded = { [weak self] in self?.scheduleHide() }
     }
 
     func enqueue(_ message: PetMessage) {
@@ -163,7 +164,7 @@ final class PetSpeaker {
         let message = queue.removeFirst()
         current = message
         bubble.show(message, on: pet)
-        PetSound.play(settings.soundName, volume: settings.soundVolume)
+        PetSound.play(settings.soundName, volume: settings.soundVolume, maxDuration: settings.bubbleDuration)
         if settings.bounceWhileTalking { pet.setTalking(true) }
         if settings.ttsEnabled {
             // Let the sound effect finish before the voice starts.
@@ -172,9 +173,16 @@ final class PetSpeaker {
             }
         }
 
+        scheduleHide()
+    }
+
+    /// (Re)starts the bubble's timer — again when a slow GIF arrives, so it gets the full time on screen.
+    private func scheduleHide() {
+        guard current != nil, let pet else { return }
+        hideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in self?.finishCurrent() }
         hideWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + settings.bubbleDuration, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + pet.settings.bubbleDuration, execute: work)
     }
 
     private func speak(_ message: PetMessage) {

@@ -51,6 +51,21 @@ func notificationTests() {
     Check.that(PetMessage(app: "리마인더", body: "물", sender: nil).bubbleText == "리마인더: 물", "bubbleText without sender")
     Check.that(message.spokenText == "카카오톡, 손범수. 집가고싶어ㅠㅠ", "spokenText")
 
+    Check.section("움짤 링크")
+    let tenor = "https://tenor.com/view/cat-cat-dance-gif-7523542997650649169"
+    let gifMessage = PetMessage(app: "Discord", body: "이거 봐 \(tenor)", sender: "A")
+    Check.that(gifMessage.mediaLinks.map(\.absoluteString) == [tenor], "finds a Tenor link")
+    Check.that(MediaLink.removing(from: gifMessage.body) == "이거 봐", "removes the link from the text")
+    Check.that(MediaLink.removing(from: "<\(tenor)>") == "", "only a link (Discord <...>) → empty")
+    Check.that(gifMessage.spokenText == "Discord, A. 이거 봐", "TTS skips the link")
+    Check.that(PetMessage(app: "D", body: tenor, sender: nil).spokenText == "D. 움짤", "TTS says 움짤 for a lone GIF")
+    Check.that(MediaLink.find(in: "https://cdn.discordapp.com/attachments/1/2/cat.GIF?ex=abc").count == 1, "direct .gif with query")
+    Check.that(MediaLink.find(in: "https://github.com/sonbumsu/AlarmPet 그리고 https://tenor.com/search/cat").isEmpty, "ordinary links stay links")
+    Check.that(MediaLink.directURL(for: URL(string: "https://giphy.com/gifs/ai-cat-meme-774uK11mxE3W0cjE8L")!).absoluteString
+               == "https://media.giphy.com/media/774uK11mxE3W0cjE8L/200.gif", "Giphy page → direct gif")
+    let html = #"<meta class="dynamic" name="twitter:image" content="https://x/t.gif"><meta class="dynamic" property="og:image" content="https://media1.tenor.com/m/a/cat.gif?a=1&amp;b=2">"#
+    Check.that(MediaLink.previewImage(inHTML: html)?.absoluteString == "https://media1.tenor.com/m/a/cat.gif?a=1&b=2", "og:image wins, any attribute order")
+
     Check.section("로컬 HTTP")
     let json = LocalServerSource.message(from: Data(#"{"app":"터미널","body":"빌드 끝","sender":"CI","pet":"kurukuru"}"#.utf8))
     Check.that(json?.app == "터미널" && json?.body == "빌드 끝" && json?.sender == "CI" && json?.target == "kurukuru", "JSON body")
@@ -89,4 +104,25 @@ func notificationTests() {
     }
     let pet = PlaceholderAnimation.make()
     Check.that(pet.count == 36 && pet.frames.allSatisfy { $0.width == 220 && $0.height == 220 }, "default pet: 36 frames, 220px")
+
+    Check.section("내 소리")
+    let temp = FileManager.default.temporaryDirectory.appendingPathComponent("alarmpet-sounds-\(UUID().uuidString)")
+    defer { try? FileManager.default.removeItem(at: temp) }
+    let library = CustomSounds(directory: temp.appendingPathComponent("Sounds"))
+    let source = temp.appendingPathComponent("카톡왔숑.wav")
+    try! FileManager.default.createDirectory(at: temp, withIntermediateDirectories: true)
+    try! PetSound.wav(duration: 0.5, frequency: { _ in 440 }, envelope: { _ in 1 }).write(to: source)
+
+    let first = try! library.importFile(source)
+    let second = try! library.importFile(source)
+    Check.that(first == "내소리:카톡왔숑.wav" && second == "내소리:카톡왔숑 2.wav", "import copies, same name gets a number")
+    Check.that(library.names == [first, second], "library lists imported sounds")
+    Check.that(CustomSounds.displayName(first) == "카톡왔숑" && CustomSounds.displayName("뿅") == "뿅", "display name drops prefix and extension")
+    Check.that(abs((library.makeSound(first)?.duration ?? 0) - 0.5) < 0.01, "imported file plays")
+    try! FileManager.default.removeItem(at: source)
+    Check.that(library.makeSound(first) != nil, "still plays after the original is deleted")
+    library.remove(first)
+    Check.that(library.names == [second] && library.makeSound(first) == nil, "remove")
+    Check.that(library.url(for: "내소리:../../etc/passwd") == nil, "no paths outside the folder")
+    Check.that(AlarmSound.makeSound("내소리:없는파일.mp3") != nil, "missing alarm file → default alarm still rings")
 }

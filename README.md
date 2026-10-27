@@ -97,6 +97,31 @@ open /Applications/AlarmPet.app
 
 그다음 펫 설정에서 **"로그인 시 자동 실행"**을 켜면 맥을 켤 때마다 알아서 실행돼요.
 
+### ⑥ 업데이트하기 (새 기능 받기)
+
+알림펫은 저절로 업데이트되지 않아요. 새 버전이 올라오면 직접 받아서 다시 빌드해 주세요.
+
+**git clone으로 받았다면** 알림펫 폴더에서:
+
+```bash
+git pull
+./build.sh --run
+```
+
+**ZIP으로 받았다면** ZIP을 다시 받아 압축을 풀고, 그 폴더에서 `./build.sh --run`을 실행해요.
+
+**응용 프로그램 폴더로 옮겨서 쓰고 있다면** 빌드한 다음 새 앱으로 바꿔 넣어요.
+
+```bash
+osascript -e 'quit app "AlarmPet"'
+rm -rf /Applications/AlarmPet.app
+cp -R build/AlarmPet.app /Applications/
+open /Applications/AlarmPet.app
+```
+
+- 펫, 위치·크기, 리마인더, 내 소리, 설정은 그대로 남아 있어요 (`~/Library/Application Support/AlarmPet`에 따로 저장돼요).
+- 인증서(③)를 만들어 뒀다면 손쉬운 사용 권한도 그대로예요. 인증서 없이 쓰고 있다면 권한을 다시 줘야 해요 → [권한을 줬는데도 안 돼요](#권한을-줬는데도-안-돼요)
+
 ---
 
 ## 3. 처음 실행하면
@@ -187,6 +212,8 @@ open /Applications/AlarmPet.app
 
 - 정해둔 시간(기본 5초)이 지나면 사라지고, **클릭하면 바로 닫혀요.**
 - 알림이 여러 개 오면 하나씩 차례로 말해요.
+- 내용에 **움짤 링크**(Tenor, Giphy, `.gif`·`.png`·`.jpg` 주소)가 있으면 링크 대신 **움짤을 말풍선 안에서 보여줘요.**
+  받는 동안은 "🎞️ 움짤 불러오는 중…"이 뜨고, 못 받으면 원래처럼 링크 글자로 보여요.
 
 ### ③ 펫마다 다르게 설정하기 (펫 설정 → 알림 탭)
 
@@ -196,7 +223,7 @@ open /Applications/AlarmPet.app
 | 말풍선 크기 | 70% ~ 200% |
 | 표시 시간 | 2 ~ 15초 |
 | 말할 때 통통 튀기 | 말하는 동안 펫이 통통 튀어요 |
-| 알림 소리 | 뿅 · 삐롱 · 뽀잉 / macOS 기본 소리 / 없음, 볼륨 조절 |
+| 알림 소리 | 뿅 · 삐롱 · 뽀잉 / macOS 기본 소리 / **내 소리** / 없음, 볼륨 조절 |
 | 소리 내서 읽기 (TTS) | 알림 내용을 한국어 음성으로 읽어줘요 |
 | **말해줄 앱** | 비워두면 모든 앱. 쉼표로 구분해요. 예) `카카오톡, Discord` |
 | **무시할 앱** | 이 앱 알림은 말하지 않아요. 예) `메일` |
@@ -283,7 +310,19 @@ npm run build && curl -X POST localhost:7777/say -d '{"app":"터미널","body":"
 
 ### 알람 소리
 
-리마인더 탭 아래에서 펫마다 고를 수 있어요. 따르릉 · 삐삐삐삐 · 딩동댕 · 뽀잉뽀잉 / macOS 기본 소리 중에서 고르고, 🔊로 미리 듣고, 볼륨도 조절해요. **[알람 테스트]**를 누르면 바로 울려 볼 수 있어요.
+리마인더 탭 아래에서 펫마다 고를 수 있어요. 따르릉 · 삐삐삐삐 · 딩동댕 · 뽀잉뽀잉 / macOS 기본 소리 / 내 소리 중에서 고르고, 🔊로 미리 듣고, 볼륨도 조절해요. **[알람 테스트]**를 누르면 바로 울려 볼 수 있어요.
+
+### 내 소리 (원하는 음성 파일 쓰기)
+
+알림 소리와 알람 소리 모두 내 음성 파일로 바꿀 수 있어요.
+
+1. 펫 설정 → **알림 탭**(알림 소리) 또는 **리마인더 탭**(알람 소리)에서 **[내 소리 추가…]**를 눌러요.
+2. mp3 · m4a · wav · aiff 파일을 고르면 바로 그 소리로 바뀌어요.
+3. 한 번 추가한 소리는 모든 펫의 소리 목록 **"내 소리"** 칸에 나와요.
+
+- 파일은 알림펫 폴더(`~/Library/Application Support/AlarmPet/Sounds`)에 복사돼요. 그래서 원본 파일을 옮기거나 지워도 계속 울려요.
+- 알람으로 쓰면 끄기 전까지 처음부터 계속 반복해요. 알림 소리로 쓰면 말풍선이 떠 있는 동안만 나와요.
+- 내 소리를 고른 상태에서 **[‘이름’ 삭제]**를 누르면 목록에서 지워져요. 그 소리를 쓰던 다른 펫은 기본 소리로 울려요.
 
 > 맥 전체 음량이 꺼져 있으면 알람도 안 들려요.
 
@@ -362,7 +401,7 @@ open --env ALARMPET_AX_DEBUG=1 build/AlarmPet.app
 ```bash
 osascript -e 'quit app "AlarmPet"'
 rm -rf /Applications/AlarmPet.app build/                     # 앱
-rm -rf ~/Library/Application\ Support/AlarmPet               # 펫·리마인더 설정
+rm -rf ~/Library/Application\ Support/AlarmPet               # 펫·리마인더 설정, 내 소리
 rm -rf ~/Library/Logs/AlarmPet                               # 진단 로그
 defaults delete com.sonbumsu.alarmpet                        # 알림 설정
 tccutil reset Accessibility com.sonbumsu.alarmpet            # 손쉬운 사용 권한

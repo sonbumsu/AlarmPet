@@ -10,13 +10,17 @@ enum AlarmSound {
 
     /// Synthesized alarm patterns, in picker order.
     static let builtIn = ["따르릉", "삐삐삐삐", "딩동댕", "뽀잉뽀잉"]
-    /// macOS system sounds can be looped as alarms too.
+    /// macOS system sounds and the user's own files (CustomSounds) can be looped as alarms too.
     static var system: [String] { PetSound.system }
 
     private static var cache: [String: Data] = [:]
 
     /// One period of the pattern, including the pause before it repeats.
     static func makeSound(_ name: String) -> NSSound? {
+        if CustomSounds.isCustom(name) {
+            // File deleted → still ring, with the default alarm.
+            return CustomSounds.shared.makeSound(name) ?? makeSound(defaultName)
+        }
         guard builtIn.contains(name) else { return NSSound(named: NSSound.Name(name)) }
         if cache[name] == nil { cache[name] = synthesize(name) }
         return cache[name].flatMap { NSSound(data: $0) }
@@ -28,14 +32,20 @@ enum AlarmSound {
         return builtIn.contains(name) ? duration : max(duration + 0.35, 1)
     }
 
-    /// Play one period (settings preview).
+    /// Play one period (settings preview). Long custom files are cut off after a few seconds.
     private static var preview: NSSound?
     static func playPreview(_ name: String, volume: Double) {
         preview?.stop()
-        preview = makeSound(name)
-        preview?.volume = Float(volume)
-        preview?.play()
+        let sound = makeSound(name)
+        preview = sound
+        sound?.volume = Float(volume)
+        sound?.play()
+        if let sound, sound.duration > previewLimit {
+            DispatchQueue.main.asyncAfter(deadline: .now() + previewLimit) { [weak sound] in sound?.stop() }
+        }
     }
+
+    static let previewLimit: TimeInterval = 8
 
     // MARK: - Synthesis
 

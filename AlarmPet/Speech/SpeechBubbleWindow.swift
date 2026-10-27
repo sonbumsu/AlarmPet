@@ -45,6 +45,8 @@ struct BubbleLayout {
 final class SpeechBubbleController {
 
     var onTap: (() -> Void)?
+    /// A GIF finished loading into the bubble that's showing now.
+    var onMediaLoaded: (() -> Void)?
 
     private let window = SpeechBubbleWindow()
     private var hosting: FirstMouseHostingView?
@@ -64,9 +66,24 @@ final class SpeechBubbleController {
 
     func show(_ message: PetMessage, on pet: OverlayWindowController) {
         let size = CGFloat(pet.settings.bubbleSize)
+        let link = message.mediaLinks.first
+        var media: BubbleMediaState = .none
+        if let link {
+            media = BubbleMedia.cached(link).map { .loaded($0) } ?? .loading
+        }
         present(on: pet, maxViewWidth: SpeechBubbleView.Metrics.maxViewWidth(size: size)) { [weak self] layout in
-            AnyView(SpeechBubbleView(message: message, tailOnBottom: layout.tailOnBottom, tailX: layout.tailX,
+            AnyView(SpeechBubbleView(message: message, media: media, tailOnBottom: layout.tailOnBottom, tailX: layout.tailX,
                                      animated: layout.animated, size: size) { self?.onTap?() })
+        }
+
+        // Show the text right away; grow the bubble when the GIF arrives.
+        guard case .loading = media, let link else { return }
+        let token = generation
+        BubbleMedia.load(link) { [weak self] gif in
+            guard let self, self.generation == token else { return }
+            media = gif.map { .loaded($0) } ?? .failed
+            self.reposition()
+            if gif != nil { self.onMediaLoaded?() }
         }
     }
 
