@@ -12,7 +12,7 @@ func notificationTests() {
     Check.that(roundTrip == old, "record round-trips")
 
     Check.section("펫별 앱 필터")
-    let suite = "alarmpet-tests"
+    let suite = "notipet-tests"
     UserDefaults().removePersistentDomain(forName: suite)
     let notifications = NotificationSettings(defaults: UserDefaults(suiteName: suite)!)
     notifications.appAliases = "KakaoTalk=카톡"
@@ -60,7 +60,7 @@ func notificationTests() {
     Check.that(gifMessage.spokenText == "Discord, A. 이거 봐", "TTS skips the link")
     Check.that(PetMessage(app: "D", body: tenor, sender: nil).spokenText == "D. 움짤", "TTS says 움짤 for a lone GIF")
     Check.that(MediaLink.find(in: "https://cdn.discordapp.com/attachments/1/2/cat.GIF?ex=abc").count == 1, "direct .gif with query")
-    Check.that(MediaLink.find(in: "https://github.com/sonbumsu/AlarmPet 그리고 https://tenor.com/search/cat").isEmpty, "ordinary links stay links")
+    Check.that(MediaLink.find(in: "https://github.com/sonbumsu/NotiPet 그리고 https://tenor.com/search/cat").isEmpty, "ordinary links stay links")
     Check.that(MediaLink.directURL(for: URL(string: "https://giphy.com/gifs/ai-cat-meme-774uK11mxE3W0cjE8L")!).absoluteString
                == "https://media.giphy.com/media/774uK11mxE3W0cjE8L/200.gif", "Giphy page → direct gif")
     let klipy = URL(string: "https://klipy.com/gifs/-33785")!
@@ -115,7 +115,7 @@ func notificationTests() {
     Check.that(pet.count == 36 && pet.frames.allSatisfy { $0.width == 220 && $0.height == 220 }, "default pet: 36 frames, 220px")
 
     Check.section("내 소리")
-    let temp = FileManager.default.temporaryDirectory.appendingPathComponent("alarmpet-sounds-\(UUID().uuidString)")
+    let temp = FileManager.default.temporaryDirectory.appendingPathComponent("notipet-sounds-\(UUID().uuidString)")
     defer { try? FileManager.default.removeItem(at: temp) }
     let library = CustomSounds(directory: temp.appendingPathComponent("Sounds"))
     let source = temp.appendingPathComponent("카톡왔숑.wav")

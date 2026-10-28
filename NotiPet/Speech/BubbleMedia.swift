@@ -62,7 +62,7 @@ enum BubbleMedia {
 
     private static func fetch(_ url: URL, followPage: Bool, completion: @escaping (BubbleGIF?) -> Void) {
         var request = URLRequest(url: url, timeoutInterval: Constants.timeout)
-        request.setValue("Mozilla/5.0 (Macintosh) AlarmPet", forHTTPHeaderField: "User-Agent")
+        request.setValue("Mozilla/5.0 (Macintosh) NotiPet", forHTTPHeaderField: "User-Agent")
         URLSession.shared.dataTask(with: request) { data, response, _ in
             guard let data, data.count <= Constants.maxBytes,
                   (response as? HTTPURLResponse)?.statusCode ?? 200 < 400 else { return completion(nil) }

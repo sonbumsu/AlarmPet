@@ -1,6 +1,6 @@
 // CustomSounds.swift
 // The user's own sound files ("내 소리"), usable as a notification sound or an alarm.
-// Imported files are copied to ~/Library/Application Support/AlarmPet/Sounds,
+// Imported files are copied to ~/Library/Application Support/NotiPet/Sounds,
 // so moving or deleting the original doesn't break the setting.
 // In settings they are stored as "내소리:<file name>".
 
@@ -18,7 +18,7 @@ final class CustomSounds: ObservableObject {
     let directory: URL
 
     init(directory: URL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("AlarmPet/Sounds", isDirectory: true)) {
+            .appendingPathComponent("NotiPet/Sounds", isDirectory: true)) {
         self.directory = directory
         reload()
     }

@@ -188,7 +188,8 @@ final class OverlayWindowController: NSWindowController {
 
         let didLoad = loadAsset(
             url: url,
-            bookmarkData: bookmark,
+            // Not our own bookmark (made before the rename): save a fresh one.
+            bookmarkData: didStartSecurityScope ? bookmark : SecurityScopedAccess.bookmark(for: url) ?? bookmark,
             preservingSecurityScope: didStartSecurityScope
         )
         if !didLoad, didStartSecurityScope {

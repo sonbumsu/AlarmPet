@@ -139,7 +139,7 @@ final class PetsStore {
 
     private enum Constants {
         static let schemaVersion = 1
-        static let directoryName = "AlarmPet"
+        static let directoryName = "NotiPet"
         static let fileName = "pets.plist"
         static let saveDelay: TimeInterval = 0.4
     }

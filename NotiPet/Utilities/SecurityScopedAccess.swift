@@ -22,12 +22,19 @@ enum SecurityScopedAccess {
     /// Call `stopAccessingSecurityScopedResource()` on the URL when done.
     static func resolve(bookmark: Data) -> URL? {
         var isStale = false
-        guard let url = try? URL(
+        if let url = try? URL(
             resolvingBookmarkData: bookmark,
             options: .withSecurityScope,
             relativeTo: nil,
             bookmarkDataIsStale: &isStale
-        ), !isStale else { return nil }
+        ), !isStale {
+            return url
+        }
+        // A bookmark made by another app (AlarmPet, before the rename) has no usable security
+        // scope here. The app isn't sandboxed, so the plain location is enough to open the file.
+        isStale = false
+        guard let url = try? URL(resolvingBookmarkData: bookmark, options: [], relativeTo: nil,
+                                 bookmarkDataIsStale: &isStale), !isStale else { return nil }
         return url
     }
 }

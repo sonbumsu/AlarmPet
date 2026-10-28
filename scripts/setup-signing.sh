@@ -1,10 +1,10 @@
 #!/bin/bash
-# Creates a local self-signed code-signing certificate ("AlarmPet Dev") in the login keychain.
+# Creates a local self-signed code-signing certificate ("NotiPet Dev") in the login keychain.
 # build.sh signs with it when present, so the Accessibility permission survives rebuilds.
 # Run once per Mac:  ./scripts/setup-signing.sh
 set -euo pipefail
 
-NAME="AlarmPet Dev"
+NAME="NotiPet Dev"
 KEYCHAIN="$HOME/Library/Keychains/login.keychain-db"
 
 if security find-certificate -c "$NAME" "$KEYCHAIN" >/dev/null 2>&1; then

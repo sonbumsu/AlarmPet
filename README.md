@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="AlarmPet/Resources/AppIcon.iconset/icon_128x128@2x.png" width="128" alt="알림펫 아이콘">
+  <img src="NotiPet/Resources/AppIcon.iconset/icon_128x128@2x.png" width="128" alt="알림펫 아이콘">
 </p>
 
 # 알림펫 🐾
@@ -60,11 +60,11 @@ xcode-select --install
 ### ② 알림펫 코드 받기
 
 ```bash
-git clone https://github.com/sonbumsu/AlarmPet.git
-cd AlarmPet
+git clone https://github.com/sonbumsu/NotiPet.git
+cd NotiPet
 ```
 
-git이 없다면 [GitHub 페이지](https://github.com/sonbumsu/AlarmPet)에서 **Code → Download ZIP**으로 받아 압축을 풀고, 터미널에서 그 폴더로 이동해도 돼요 (`cd ~/Downloads/AlarmPet-main`).
+git이 없다면 [GitHub 페이지](https://github.com/sonbumsu/NotiPet)에서 **Code → Download ZIP**으로 받아 압축을 풀고, 터미널에서 그 폴더로 이동해도 돼요 (`cd ~/Downloads/NotiPet-main`).
 
 > 아래 명령에서 `permission denied`가 나오면 앞에 `bash`를 붙여서 실행하세요. 예) `bash build.sh --run`
 
@@ -82,8 +82,8 @@ git이 없다면 [GitHub 페이지](https://github.com/sonbumsu/AlarmPet)에서 
 ./build.sh --run
 ```
 
-- `build/AlarmPet.app`이 만들어지고 바로 실행돼요.
-- 처음 빌드할 때 **"codesign이 키체인의 'AlarmPet Dev' 키를 사용하려고 합니다"** 창이 뜨면, 맥 로그인 비밀번호를 넣고 **[항상 허용]**을 눌러 주세요.
+- `build/NotiPet.app`이 만들어지고 바로 실행돼요.
+- 처음 빌드할 때 **"codesign이 키체인의 'NotiPet Dev' 키를 사용하려고 합니다"** 창이 뜨면, 맥 로그인 비밀번호를 넣고 **[항상 허용]**을 눌러 주세요.
 - 실행하지 않고 빌드만 하려면 `./build.sh`만 입력하면 돼요.
 
 ### ⑤ (선택) 응용 프로그램 폴더로 옮기기
@@ -91,8 +91,8 @@ git이 없다면 [GitHub 페이지](https://github.com/sonbumsu/AlarmPet)에서 
 계속 쓸 거라면 앱을 응용 프로그램 폴더로 옮겨 두면 편해요.
 
 ```bash
-cp -R build/AlarmPet.app /Applications/
-open /Applications/AlarmPet.app
+cp -R build/NotiPet.app /Applications/
+open /Applications/NotiPet.app
 ```
 
 그다음 펫 설정에서 **"로그인 시 자동 실행"**을 켜면 맥을 켤 때마다 알아서 실행돼요.
@@ -113,14 +113,32 @@ git pull
 **응용 프로그램 폴더로 옮겨서 쓰고 있다면** 빌드한 다음 새 앱으로 바꿔 넣어요.
 
 ```bash
-osascript -e 'quit app "AlarmPet"'
-rm -rf /Applications/AlarmPet.app
-cp -R build/AlarmPet.app /Applications/
-open /Applications/AlarmPet.app
+osascript -e 'quit app "NotiPet"'
+rm -rf /Applications/NotiPet.app
+cp -R build/NotiPet.app /Applications/
+open /Applications/NotiPet.app
 ```
 
-- 펫, 위치·크기, 알람, 내 소리, 설정은 그대로 남아 있어요 (`~/Library/Application Support/AlarmPet`에 따로 저장돼요).
+- 펫, 위치·크기, 알람, 내 소리, 설정은 그대로 남아 있어요 (`~/Library/Application Support/NotiPet`에 따로 저장돼요).
 - 인증서(③)를 만들어 뒀다면 손쉬운 사용 권한도 그대로예요. 인증서 없이 쓰고 있다면 권한을 다시 줘야 해요 → [권한을 줬는데도 안 돼요](#권한을-줬는데도-안-돼요)
+
+#### AlarmPet을 쓰고 있었다면 (한 번만)
+
+영어 이름이 **AlarmPet → NotiPet**으로 바뀌었어요. `git pull`은 그대로 돼요(GitHub이 예전 주소를 새 주소로 연결해 줘요).
+
+- 펫, 알람, 내 소리, 알림 설정(Klipy 키 포함)은 NotiPet을 처음 켤 때 **자동으로 옮겨져요.**
+- 앱이 새 앱으로 인식돼서 아래는 **다시 해줘야 해요.**
+  - 처음 켤 때 펫 파일이 있는 폴더(iCloud Drive, 다운로드 등)에 접근해도 되는지 묻는 창이 뜨면 **[허용]**을 눌러요.
+  - 손쉬운 사용 권한: 시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용에서 **NotiPet**을 켜고, 예전 **AlarmPet**은 지워요.
+  - 로그인 시 자동 실행: 펫 설정에서 다시 켜고, 시스템 설정 → 일반 → 로그인 항목에서 **AlarmPet**은 지워요.
+- 응용 프로그램 폴더에 예전 앱이 있으면 지워요.
+
+```bash
+osascript -e 'quit app "AlarmPet"'
+rm -rf /Applications/AlarmPet.app
+cp -R build/NotiPet.app /Applications/
+open /Applications/NotiPet.app
+```
 
 ---
 
@@ -195,7 +213,7 @@ open /Applications/AlarmPet.app
 ### ① 시스템 알림 읽기 켜기 (처음 한 번)
 
 1. 메뉴바 아이콘 → **알림 설정…** → **"시스템 알림 읽기 (카카오톡 등)"** 켜기
-2. 권한 요청 창이 뜨면 **시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용**에서 **AlarmPet**을 켜기
+2. 권한 요청 창이 뜨면 **시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용**에서 **NotiPet**을 켜기
 3. 이제 화면 오른쪽 위에 macOS 알림이 뜨면 펫이 말풍선으로 말해요.
 
 > 왜 "손쉬운 사용" 권한이 필요하냐면, macOS에는 다른 앱의 알림을 읽는 공식 기능이 없어서 **화면에 뜬 알림 배너를 읽는 방식**을 쓰기 때문이에요. 알림 내용은 맥 밖으로 보내지 않아요.
@@ -323,7 +341,7 @@ npm run build && curl -X POST localhost:7777/say -d '{"app":"터미널","body":"
 2. mp3 · m4a · wav · aiff 파일을 고르면 바로 그 소리로 바뀌어요.
 3. 한 번 추가한 소리는 모든 펫의 소리 목록 **"내 소리"** 칸에 나와요.
 
-- 파일은 알림펫 폴더(`~/Library/Application Support/AlarmPet/Sounds`)에 복사돼요. 그래서 원본 파일을 옮기거나 지워도 계속 울려요.
+- 파일은 알림펫 폴더(`~/Library/Application Support/NotiPet/Sounds`)에 복사돼요. 그래서 원본 파일을 옮기거나 지워도 계속 울려요.
 - 알람으로 쓰면 파일을 **끝까지 다 들려준 다음 처음부터 다시** 재생해요. 끄기 전까지 계속 반복해요 (10분 동안 안 끄면 "놓친 알람"이 돼요).
 - 알림 소리로 쓰면 말풍선이 떠 있는 동안만 나와요. 설정 창의 🔊 미리 듣기도 8초까지만 들려줘요. 전체를 들어 보려면 **[알람 테스트]**를 누르세요.
 - 내 소리를 고른 상태에서 **[‘이름’ 삭제]**를 누르면 목록에서 지워져요. 그 소리를 쓰던 다른 펫은 기본 소리로 울려요.
@@ -368,10 +386,10 @@ npm run build && curl -X POST localhost:7777/say -d '{"app":"터미널","body":"
 
 ### 권한을 줬는데도 안 돼요
 
-손쉬운 사용 목록에 AlarmPet이 켜져 있는데도 안 되면, 예전 버전 기준으로 등록된 항목일 수 있어요. 아래를 실행하고 알림펫을 다시 켠 다음 권한을 다시 허용해 주세요.
+손쉬운 사용 목록에 NotiPet이 켜져 있는데도 안 되면, 예전 버전 기준으로 등록된 항목일 수 있어요. 아래를 실행하고 알림펫을 다시 켠 다음 권한을 다시 허용해 주세요.
 
 ```bash
-tccutil reset Accessibility com.sonbumsu.alarmpet
+tccutil reset Accessibility com.sonbumsu.notipet
 ```
 
 `./scripts/setup-signing.sh`를 실행해 두면 다시 빌드해도 권한이 유지돼요.
@@ -392,24 +410,24 @@ tccutil reset Accessibility com.sonbumsu.alarmpet
 ### 원인을 자세히 보고 싶어요 (진단 모드)
 
 ```bash
-osascript -e 'quit app "AlarmPet"'
-open --env ALARMPET_AX_DEBUG=1 build/AlarmPet.app
+osascript -e 'quit app "NotiPet"'
+open --env NOTIPET_AX_DEBUG=1 build/NotiPet.app
 ```
 
-알림이 오면 `~/Library/Logs/AlarmPet/ax.log`에 알림을 어떻게 읽었는지, 닫았는지가 기록돼요. 평소처럼 쓰려면 앱을 종료하고 그냥 다시 켜면 돼요.
+알림이 오면 `~/Library/Logs/NotiPet/ax.log`에 알림을 어떻게 읽었는지, 닫았는지가 기록돼요. 평소처럼 쓰려면 앱을 종료하고 그냥 다시 켜면 돼요.
 
 ---
 
 ## 9. 삭제하기
 
 ```bash
-osascript -e 'quit app "AlarmPet"'
-rm -rf /Applications/AlarmPet.app build/                     # 앱
-rm -rf ~/Library/Application\ Support/AlarmPet               # 펫·알람 설정, 내 소리
-rm -rf ~/Library/Logs/AlarmPet                               # 진단 로그
-defaults delete com.sonbumsu.alarmpet                        # 알림 설정
-tccutil reset Accessibility com.sonbumsu.alarmpet            # 손쉬운 사용 권한
-security delete-identity -c "AlarmPet Dev" ~/Library/Keychains/login.keychain-db      # 서명 인증서 (+ 키)
+osascript -e 'quit app "NotiPet"'
+rm -rf /Applications/NotiPet.app build/                     # 앱
+rm -rf ~/Library/Application\ Support/NotiPet               # 펫·알람 설정, 내 소리
+rm -rf ~/Library/Logs/NotiPet                               # 진단 로그
+defaults delete com.sonbumsu.notipet                        # 알림 설정
+tccutil reset Accessibility com.sonbumsu.notipet            # 손쉬운 사용 권한
+security delete-identity -c "NotiPet Dev" ~/Library/Keychains/login.keychain-db      # 서명 인증서 (+ 키)
 ```
 
 ---

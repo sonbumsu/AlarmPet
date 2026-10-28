@@ -44,7 +44,7 @@
 
 **기존에 이미 있는 펫 옵션** (그대로 유지): Name, Playing, Speed, Opacity, Scale(0.25×~4.0×), Always on Top, Click-Through, Lock Position, Start at Login.
 (Flip H/V는 설정 화면에서 뺐다. 회전으로 대신한다.)
-설정 저장 위치: `~/Library/Application Support/desktop-pet/pets.plist` → 알림펫에서는 `~/Library/Application Support/AlarmPet/pets.plist`로 변경.
+설정 저장 위치: `~/Library/Application Support/desktop-pet/pets.plist` → 알림펫에서는 `~/Library/Application Support/NotiPet/pets.plist`로 변경.
 
 Windows 버전(`DesktopPet.Windows/`)은 사용하지 않는다. **macOS 전용.**
 
@@ -267,7 +267,7 @@ macOS는 **다른 앱의 알림을 읽는 공식 API를 제공하지 않는다.*
 ```
 알림펫/
 ├── README.md
-├── AlarmPet/
+├── NotiPet/
 │   ├── App/                        # AppDelegate, main.swift, Info.plist          (desktop-pet)
 │   ├── Playback/                   # 애니메이션 디코더·재생                        (desktop-pet)
 │   ├── Utilities/                  # 북마크 (desktop-pet), 앱 이름 목록(AppDirectory),
@@ -300,10 +300,10 @@ macOS는 **다른 앱의 알림을 읽는 공식 API를 제공하지 않는다.*
 │       ├── ReminderScheduler.swift       # B. 펫별 알람 시간 체크 → AlarmCenter
 │       └── AccessibilitySource.swift     # C. 시스템 알림 배너 감지
 ├── Tests/                          # 자동 테스트 (XCTest 없이 실행)
-├── build.sh                        # swiftc로 build/AlarmPet.app 빌드 (Xcode 불필요)
+├── build.sh                        # swiftc로 build/NotiPet.app 빌드 (Xcode 불필요)
 ├── test.sh                         # Tests/ 실행
 ├── scripts/make-icon.swift         # AlarmCatArt로 앱 아이콘 AppIcon.iconset 생성
-├── scripts/setup-signing.sh        # 로컬 서명 인증서 "AlarmPet Dev" 만들기
+├── scripts/setup-signing.sh        # 로컬 서명 인증서 "NotiPet Dev" 만들기
 └── LICENSE                         # MIT (desktop-pet 저작권 표기 포함)
 ```
 
@@ -311,13 +311,13 @@ macOS는 **다른 앱의 알림을 읽는 공식 API를 제공하지 않는다.*
 
 ## 7. 개발 로드맵
 
-- [x] **1단계 – 기반 가져오기**: desktop-pet 코드 가져와서 빌드, 이름을 AlarmPet으로 변경, 펫 띄우기 확인
+- [x] **1단계 – 기반 가져오기**: desktop-pet 코드 가져와서 빌드, 이름을 AlarmPet으로 변경 (나중에 NotiPet으로 다시 바꿈), 펫 띄우기 확인
 - [x] **2단계 – 크기 자유 조절**: 범위 0.1×~8.0×, 숫자 입력, `⌘+스크롤`, 핀치, 모서리 핸들
 - [x] **3단계 – 각도 조절**: 회전 transform, 바운딩 박스 창 크기, 슬라이더·핸들·단축키, 알파 기반 클릭 통과
 - [x] **4단계 – 말풍선**: `SpeechBubbleWindow`, `앱: 내용 - 보낸사람` 형식, 큐, 자동 사라짐, 화면 끝 위치 보정
 - [x] **5단계 – 로컬 HTTP**: `curl`로 펫에게 말 시키기 (말풍선 테스트용)
 - [x] **6단계 – 실제 알림 연결**: Accessibility 권한 요청, 카카오톡 등 알림 배너 감지, 앱 필터·이름 바꾸기, 원래 배너 닫기 (카카오톡·디스코드 실기기 확인)
-  - macOS 26.6에서 검증. 배너 구조는 버전마다 달라질 수 있으니 안 되면 `open --env ALARMPET_AX_DEBUG=1 build/AlarmPet.app` 로 실행하고 `~/Library/Logs/AlarmPet/ax.log` 확인
+  - macOS 26.6에서 검증. 배너 구조는 버전마다 달라질 수 있으니 안 되면 `open --env NOTIPET_AX_DEBUG=1 build/NotiPet.app` 로 실행하고 `~/Library/Logs/NotiPet/ax.log` 확인
 - [x] **7단계 – 다듬기**: TTS, 말할 때 통통 튀는 애니메이션 (집중 모드 감지는 macOS가 파일 접근을 막아 제거)
 - [x] **8단계 – 펫별 설정·알람**: 펫마다 알림 설정, 펫별 알람(수정, "5분 뒤 다시" 저장), 알람시계 고양이 아이콘·기본 펫, 로컬 HTTP 포트 설정, 자동 테스트(`./test.sh`)
 
@@ -344,9 +344,9 @@ npm run build && curl -X POST localhost:7777/say -d '{"app": "터미널", "body"
 
 ## 9. 필요한 권한
 
-- **손쉬운 사용** (시스템 알림 읽기를 켤 때만): 시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용 → AlarmPet 허용
-  - `build.sh`는 로그인 키체인의 **"AlarmPet Dev"** 자체 서명 인증서가 있으면 그걸로 서명해서, 다시 빌드해도 권한이 유지돼요. 인증서가 없으면 ad-hoc 서명이라 빌드할 때마다 권한을 다시 줘야 해요.
-  - 권한 목록에 켜져 있는데도 안 되면: `tccutil reset Accessibility com.sonbumsu.alarmpet` 후 앱을 다시 실행해서 허용.
+- **손쉬운 사용** (시스템 알림 읽기를 켤 때만): 시스템 설정 → 개인정보 보호 및 보안 → 손쉬운 사용 → NotiPet 허용
+  - `build.sh`는 로그인 키체인의 **"NotiPet Dev"** 자체 서명 인증서가 있으면 그걸로 서명해서, 다시 빌드해도 권한이 유지돼요. 인증서가 없으면 ad-hoc 서명이라 빌드할 때마다 권한을 다시 줘야 해요.
+  - 권한 목록에 켜져 있는데도 안 되면: `tccutil reset Accessibility com.sonbumsu.notipet` 후 앱을 다시 실행해서 허용.
 - 그 외 기능은 별도 권한 없음
 
 ## 9-1. 알려진 제한

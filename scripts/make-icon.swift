@@ -1,8 +1,8 @@
 // make-icon.swift
-// Writes the AlarmPet app icon (the alarm-clock cat from AlarmCatArt) as iconset PNGs.
+// Writes the NotiPet app icon (the alarm-clock cat from AlarmCatArt) as iconset PNGs.
 //
-//   swiftc -O scripts/make-icon.swift AlarmPet/Utilities/AlarmCatArt.swift -o /tmp/make-icon
-//   /tmp/make-icon AlarmPet/Resources/AppIcon.iconset
+//   swiftc -O scripts/make-icon.swift NotiPet/Utilities/AlarmCatArt.swift -o /tmp/make-icon
+//   /tmp/make-icon NotiPet/Resources/AppIcon.iconset
 
 import AppKit
 

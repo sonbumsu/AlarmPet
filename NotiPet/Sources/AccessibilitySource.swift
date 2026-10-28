@@ -11,7 +11,7 @@
 // banner can be closed while it is still sliding in. A slow poll is kept as a fallback.
 //
 // The AX layout differs between macOS versions, so parsing has several fallbacks.
-// Run with ALARMPET_AX_DEBUG=1 to write diagnostics to ~/Library/Logs/AlarmPet/ax.log
+// Run with NOTIPET_AX_DEBUG=1 to write diagnostics to ~/Library/Logs/NotiPet/ax.log
 // (trust state, Notification Center windows, the full AX tree, close attempts).
 
 import AppKit
@@ -41,7 +41,7 @@ final class AccessibilitySource: NotificationSource {
     private var observedPID: pid_t = 0
     private var visibleKeys: Set<String> = []
     private var primed = false
-    private let debug = ProcessInfo.processInfo.environment["ALARMPET_AX_DEBUG"] == "1"
+    private let debug = ProcessInfo.processInfo.environment["NOTIPET_AX_DEBUG"] == "1"
     private var lastDebugState = ""
 
     // MARK: - Permission
@@ -334,7 +334,7 @@ final class AccessibilitySource: NotificationSource {
         return AXValueGetValue(value as! AXValue, .cgSize, &size) ? size : nil
     }
 
-    // MARK: - Debug log (~/Library/Logs/AlarmPet/ax.log)
+    // MARK: - Debug log (~/Library/Logs/NotiPet/ax.log)
 
     /// Logs `state` only when it changed since last time. Returns true if it was logged.
     @discardableResult
@@ -347,7 +347,7 @@ final class AccessibilitySource: NotificationSource {
 
     private func debugLog(_ line: String) {
         guard debug else { return }
-        let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/AlarmPet")
+        let dir = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Logs/NotiPet")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let url = dir.appendingPathComponent("ax.log")
         let stamp = ISO8601DateFormatter().string(from: Date())
