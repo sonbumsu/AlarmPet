@@ -1,7 +1,7 @@
 // make-icon.swift
-// Writes the NotiPet app icon (the alarm-clock cat from AlarmCatArt) as iconset PNGs.
+// Writes the NotiPet app icon (the bubble cat from AppIconArt) as iconset PNGs.
 //
-//   swiftc -O scripts/make-icon.swift NotiPet/Utilities/AlarmCatArt.swift -o /tmp/make-icon
+//   swiftc -O scripts/make-icon.swift NotiPet/Utilities/AppIconArt.swift -o /tmp/make-icon
 //   /tmp/make-icon NotiPet/Resources/AppIcon.iconset
 
 import AppKit
@@ -24,7 +24,7 @@ enum MakeIcon {
                             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
         ctx.interpolationQuality = .high
         ctx.scaleBy(x: CGFloat(pixels) / 1024, y: CGFloat(pixels) / 1024)
-        AlarmCatArt.draw(in: ctx)
+        AppIconArt.drawAppIcon(in: ctx)
         return NSBitmapImageRep(cgImage: ctx.makeImage()!).representation(using: .png, properties: [:])!
     }
 }
