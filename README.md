@@ -2,7 +2,7 @@
   <img src="NotiPet/Resources/AppIcon.iconset/icon_128x128@2x.png" width="128" alt="알림펫 아이콘">
 </p>
 
-# 알림펫 🐾
+# 알림펫 (NotiPet) 🐾
 
 노트북 화면에 귀여운 펫을 띄워두면, 카톡·디스코드 같은 **알림이 올 때 펫이 말풍선으로 말해주고**, 정해둔 시간에는 **알람시계처럼 울려주는** macOS 앱이에요.
 
@@ -428,6 +428,15 @@ rm -rf ~/Library/Logs/NotiPet                               # 진단 로그
 defaults delete com.sonbumsu.notipet                        # 알림 설정
 tccutil reset Accessibility com.sonbumsu.notipet            # 손쉬운 사용 권한
 security delete-identity -c "NotiPet Dev" ~/Library/Keychains/login.keychain-db      # 서명 인증서 (+ 키)
+```
+
+예전 이름(AlarmPet)으로 쓰던 흔적도 지우려면 (NotiPet을 계속 쓸 거라면 마지막 줄의 인증서는 남겨 두세요. "NotiPet Dev"가 없으면 빌드할 때 이 인증서를 써요):
+
+```bash
+rm -rf /Applications/AlarmPet.app ~/Library/Application\ Support/AlarmPet ~/Library/Logs/AlarmPet
+defaults delete com.sonbumsu.alarmpet
+tccutil reset Accessibility com.sonbumsu.alarmpet
+security delete-identity -c "AlarmPet Dev" ~/Library/Keychains/login.keychain-db
 ```
 
 ---
