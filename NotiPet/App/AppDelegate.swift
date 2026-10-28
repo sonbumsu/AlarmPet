@@ -40,6 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController.onRequestAccessibility = { AccessibilitySource.requestPermission() }
         menuBarController.recentMessages = { [weak self] in self?.speechQueue.recent ?? [] }
 
+        _ = SleepGuard.shared   // turns sleep back on if a crashed run left it off
         restorePets()
         setupNotifications()
         setupReminders()
@@ -54,6 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         petsStore.flush()
+        SleepGuard.shared.turnOff()   // never leave the Mac unable to sleep
     }
 
     // MARK: - Pets

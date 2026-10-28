@@ -113,6 +113,11 @@ func notificationTests() {
     }
     let pet = PlaceholderAnimation.make()
     Check.that(pet.count == 36 && pet.frames.allSatisfy { $0.width == 220 && $0.height == 220 }, "default pet: 36 frames, 220px")
+    let gif = FrameSequence(frames: Array(pet.frames.prefix(3)), delays: [0.1, 0.2, 0.3])
+    Check.that(abs(gif.timeUntilNextFrame(at: 0.05) - 0.05) < 1e-9 && abs(gif.timeUntilNextFrame(at: 0.25) - 0.05) < 1e-9,
+               "next frame is due at the end of the current one")
+    Check.that(abs(gif.timeUntilNextFrame(at: 0.65) - 0.05) < 1e-9, "next frame wraps around the loop")
+    Check.that(FrameSequence(frames: [pet.frames[0]], delays: [0.1]).timeUntilNextFrame(at: 0) == .infinity, "still image never wakes")
 
     Check.section("내 소리")
     let temp = FileManager.default.temporaryDirectory.appendingPathComponent("notipet-sounds-\(UUID().uuidString)")

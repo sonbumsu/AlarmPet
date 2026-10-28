@@ -103,7 +103,7 @@ final class OverlayWindowController: NSWindowController {
         petView.lockPosition = settings.lockPosition
         petView.clickThrough = settings.clickThrough
         animationPlayer.speed = settings.speed
-        if settings.playing { animationPlayer.play() }
+        if shouldAnimate { animationPlayer.play() }
     }
 
     // MARK: - Settings Observation
@@ -140,12 +140,15 @@ final class OverlayWindowController: NSWindowController {
             self?.videoPlayer?.speed = Float(v)
         }.store(in: &cancellables)
 
-        settings.$playing.sink { [weak self] v in
+        // Also pause while nobody can see the screen (display asleep, locked, screen saver).
+        settings.$playing.combineLatest(ScreenActivity.shared.$isVisible).sink { [weak self] playing, visible in
             guard let self else { return }
-            if v { self.animationPlayer.play(); self.videoPlayer?.play() }
+            if playing && visible { self.animationPlayer.play(); self.videoPlayer?.play() }
             else { self.animationPlayer.pause(); self.videoPlayer?.pause() }
         }.store(in: &cancellables)
     }
+
+    private var shouldAnimate: Bool { settings.playing && ScreenActivity.shared.isVisible }
 
     // MARK: - Visibility
 
@@ -271,7 +274,7 @@ final class OverlayWindowController: NSWindowController {
                 naturalSize = NSSize(width: CGFloat(first.width), height: CGFloat(first.height))
             }
             animationPlayer.load(sequence)
-            if settings.playing { animationPlayer.play() }
+            if shouldAnimate { animationPlayer.play() }
 
         case .video(let player):
             animationPlayer.stop()
@@ -280,7 +283,7 @@ final class OverlayWindowController: NSWindowController {
             player.speed = Float(settings.speed)
             naturalSize = Constants.videoNaturalSize
             petView.setVideoLayer(player.playerLayer)
-            if settings.playing { player.play() }
+            if shouldAnimate { player.play() }
         }
 
         // A new asset may have a different natural size — keep the scale on-screen.
@@ -417,8 +420,14 @@ extension OverlayWindowController: PetViewDelegate {
         menu.addItem(.separator())
         menu.addItem(withTitle: "설정…", action: #selector(openSettings), keyEquivalent: "").target = self
         menu.addItem(withTitle: "숨기기", action: #selector(hidePet), keyEquivalent: "").target = self
+        menu.addItem(.separator())
+        let awakeItem = SleepGuard.shared.menuItem(action: #selector(toggleKeepAwake))
+        awakeItem.target = self
+        menu.addItem(awakeItem)
         return menu
     }
+
+    @objc private func toggleKeepAwake() { SleepGuard.shared.toggleFromMenu() }
 
     @objc private func resetRotation() { settings.rotation = 0 }
     @objc private func resetScale()    { settings.scale = clampScale(1.0) }

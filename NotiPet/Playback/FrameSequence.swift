@@ -35,4 +35,17 @@ struct FrameSequence {
         }
         return count - 1
     }
+
+    /// Seconds (at 1× speed) until the frame shown at `time` is replaced; infinity if it never is.
+    func timeUntilNextFrame(at time: TimeInterval) -> TimeInterval {
+        guard count > 1, totalDuration > 0 else { return .infinity }
+
+        let looped = time.truncatingRemainder(dividingBy: totalDuration)
+        var accumulated: TimeInterval = 0
+        for delay in delays {
+            accumulated += delay
+            if looped < accumulated { return accumulated - looped }
+        }
+        return totalDuration - looped
+    }
 }

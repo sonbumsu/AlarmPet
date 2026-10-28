@@ -19,7 +19,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 find NotiPet -name '*.swift' -print0 | xargs -0 swiftc \
   -sdk "$SDK" -target "$ARCH-apple-macosx14.0" -O \
   -framework AppKit -framework AVFoundation -framework CoreGraphics \
-  -framework ServiceManagement -framework Network -framework ApplicationServices \
+  -framework ServiceManagement -framework Network -framework ApplicationServices -framework IOKit \
   -o "$APP/Contents/MacOS/NotiPet"
 
 cp NotiPet/App/Info.plist "$APP/Contents/Info.plist"

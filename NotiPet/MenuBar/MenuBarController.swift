@@ -179,6 +179,10 @@ final class MenuBarController: NSObject {
         nextItem.isEnabled = false
         menu.addItem(nextItem)
 
+        let awakeItem = SleepGuard.shared.menuItem(action: #selector(toggleKeepAwake))
+        awakeItem.target = self
+        menu.addItem(awakeItem)
+
         menu.addItem(.separator())
 
         let recentItem = NSMenuItem(title: "최근 알림", action: nil, keyEquivalent: "")
@@ -238,6 +242,10 @@ final class MenuBarController: NSObject {
 
     @objc private func stopAllAlarms() {
         onStopAllAlarms?()
+    }
+
+    @objc private func toggleKeepAwake() {
+        SleepGuard.shared.toggleFromMenu()
     }
 
     @objc private func openNotificationSettings() {
