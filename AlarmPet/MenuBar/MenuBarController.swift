@@ -158,12 +158,12 @@ final class MenuBarController: NSObject {
         // ── Reminders ─────────────────────────────────────────────────────
         menu.addItem(.separator())
         if pets.count == 1, let pet = pets.first {
-            let reminderItem = NSMenuItem(title: "리마인더…", action: #selector(openReminders(_:)), keyEquivalent: "r")
+            let reminderItem = NSMenuItem(title: "알람…", action: #selector(openReminders(_:)), keyEquivalent: "r")
             reminderItem.target = self
             reminderItem.representedObject = pet.settings.instanceID
             menu.addItem(reminderItem)
         } else if !pets.isEmpty {
-            let reminderItem = NSMenuItem(title: "리마인더", action: nil, keyEquivalent: "")
+            let reminderItem = NSMenuItem(title: "알람", action: nil, keyEquivalent: "")
             let petsMenu = NSMenu()
             for pet in pets {
                 let item = NSMenuItem(title: "\(pet.settings.label)…", action: #selector(openReminders(_:)), keyEquivalent: "")

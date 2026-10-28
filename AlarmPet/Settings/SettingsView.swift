@@ -1,11 +1,11 @@
 // SettingsView.swift
 // Per-pet settings panel: "펫" tab (look & behavior), "알림" tab (this pet's speech bubble,
-// sound, and which apps it talks about), and "리마인더" tab (this pet's alarms).
+// sound, and which apps it talks about), and "알람" tab (this pet's alarms).
 
 import SwiftUI
 import ServiceManagement
 
-/// Which tab the settings panel shows (lets the menu bar open straight to "리마인더").
+/// Which tab the settings panel shows (lets the menu bar open straight to "알람").
 final class SettingsTabs: ObservableObject {
     enum Tab: Int { case pet, speech, reminders }
     @Published var selected: Tab = .pet
@@ -33,7 +33,7 @@ struct SettingsView: View {
                 .tabItem { Text("알림") }
                 .tag(SettingsTabs.Tab.speech)
             ScrollView { reminderTab.padding(16) }
-                .tabItem { Text("리마인더") }
+                .tabItem { Text("알람") }
                 .tag(SettingsTabs.Tab.reminders)
         }
         .padding(.top, 8)
@@ -219,7 +219,7 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - 리마인더 tab
+    // MARK: - 알람 tab
 
     private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -231,7 +231,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
 
             // ── New / edit reminder ───────────────────────────────────────
-            SectionHeader(draft.editingID == nil ? "새 리마인더" : "리마인더 수정")
+            SectionHeader(draft.editingID == nil ? "새 알람" : "알람 수정")
 
             TextField("할 일 (예: 물 마시기)", text: $draft.title)
                 .textFieldStyle(.roundedBorder)
@@ -284,7 +284,7 @@ struct SettingsView: View {
             Divider()
 
             // ── List ──────────────────────────────────────────────────────
-            SectionHeader("리마인더 목록")
+            SectionHeader("알람 목록")
 
             if settings.reminders.isEmpty {
                 Text("아직 없어요")
@@ -316,7 +316,7 @@ struct SettingsView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 0) {
-                            Text(reminder.title.isEmpty ? "리마인더" : reminder.title)
+                            Text(reminder.title.isEmpty ? "알람" : reminder.title)
                                 .lineLimit(1)
                             if let snooze = reminder.snoozeUntil, snooze > Date() {
                                 Text("💤 \(Self.timeFormatter.string(from: snooze))에 다시 울려요")
@@ -422,7 +422,7 @@ struct SettingsView: View {
 
 // MARK: - Reminder draft
 
-/// The "새 리마인더" form. ObservableObject instead of @State (no SwiftUI macro plugin in Command Line Tools).
+/// The "새 알람" form. ObservableObject instead of @State (no SwiftUI macro plugin in Command Line Tools).
 private final class ReminderDraft: ObservableObject {
     /// Set while editing an existing reminder; nil = adding a new one.
     @Published var editingID: UUID?
@@ -432,7 +432,7 @@ private final class ReminderDraft: ObservableObject {
 
     var titleOrDefault: String {
         let trimmed = title.trimmingCharacters(in: .whitespaces)
-        return trimmed.isEmpty ? "리마인더" : trimmed
+        return trimmed.isEmpty ? "알람" : trimmed
     }
 
     func binding(for day: Int) -> Binding<Bool> {

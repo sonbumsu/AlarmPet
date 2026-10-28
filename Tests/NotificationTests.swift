@@ -48,7 +48,7 @@ func notificationTests() {
     Check.section("말풍선 문구")
     let message = PetMessage(app: "카카오톡", body: "집가고싶어ㅠㅠ", sender: "손범수")
     Check.that(message.bubbleText == "카카오톡: 집가고싶어ㅠㅠ - 손범수", "bubbleText with sender")
-    Check.that(PetMessage(app: "리마인더", body: "물", sender: nil).bubbleText == "리마인더: 물", "bubbleText without sender")
+    Check.that(PetMessage(app: "알람", body: "물", sender: nil).bubbleText == "알람: 물", "bubbleText without sender")
     Check.that(message.spokenText == "카카오톡, 손범수. 집가고싶어ㅠㅠ", "spokenText")
 
     Check.section("움짤 링크")

@@ -38,7 +38,7 @@ struct AlarmBubbleView: View {
             .font(.system(size: Metrics.captionFontSize * size, weight: .semibold))
             .foregroundStyle(.orange)
 
-            Text(reminder.title.isEmpty ? "리마인더" : reminder.title)
+            Text(reminder.title.isEmpty ? "알람" : reminder.title)
                 .font(.system(size: Metrics.titleFontSize * size, weight: .bold))
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)

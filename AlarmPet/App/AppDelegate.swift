@@ -213,7 +213,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let next = reminderScheduler.nextAlarm() else { return nil }
         let formatter = DateFormatter()
         formatter.dateFormat = Calendar.current.isDateInToday(next.date) ? "HH:mm" : "M/d HH:mm"
-        let title = next.reminder.title.isEmpty ? "리마인더" : next.reminder.title
+        let title = next.reminder.title.isEmpty ? "알람" : next.reminder.title
         return "\(formatter.string(from: next.date)) \(next.pet.settings.label) · \(title)"
     }
 

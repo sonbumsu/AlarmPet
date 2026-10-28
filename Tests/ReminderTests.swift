@@ -4,7 +4,7 @@
 import Foundation
 
 func reminderTests() {
-    Check.section("리마인더: 울리는 시각")
+    Check.section("알람: 울리는 시각")
     let tue0700 = date(2026, 10, 27, 7, 0)
     Check.that(Calendar.current.component(.weekday, from: tue0700) == 3, "fixture: 2026-10-27 is Tuesday")
 
@@ -25,14 +25,14 @@ func reminderTests() {
     let five = PetReminder.inMinutes(5, title: "x", now: date(2026, 10, 27, 23, 58, 30))
     Check.that(five.onceDate == date(2026, 10, 28, 0, 3, 30) && five.hour == 0 && five.minute == 3, "5분 뒤 across midnight")
 
-    Check.section("리마인더: 표시")
+    Check.section("알람: 표시")
     Check.that(weekdays.repeatText == "평일", "평일")
     Check.that(PetReminder(title: "", hour: 9, minute: 0, weekdays: Array(1...7)).repeatText == "매일", "매일")
     Check.that(PetReminder(title: "", hour: 9, minute: 0, weekdays: [1, 7]).repeatText == "주말", "주말")
     Check.that(PetReminder(title: "", hour: 9, minute: 0, weekdays: [2, 4, 6]).repeatText == "월·수·금", "월·수·금")
     Check.that(PetReminder(title: "", hour: 7, minute: 5).timeText == "07:05", "timeText 07:05")
 
-    Check.section("리마인더: 5분 뒤 다시")
+    Check.section("알람: 5분 뒤 다시")
     var snoozed = weekdays
     snoozed.snoozeUntil = date(2026, 10, 27, 7, 5)
     Check.that(snoozed.nextOccurrence(after: tue0700) == date(2026, 10, 27, 7, 5), "snooze before the regular time rings first")
@@ -54,7 +54,7 @@ func reminderTests() {
     settings.clearSnooze(id: weekdays.id)
     Check.that(settings.reminders.first?.snoozeUntil == nil, "clearSnooze")
 
-    Check.section("리마인더: 목록 / 수정")
+    Check.section("알람: 목록 / 수정")
     let list = AppSettings(record: legacyRecord())
     list.addReminder(PetReminder(title: "b", hour: 9, minute: 0, weekdays: [2]))
     list.addReminder(PetReminder(title: "a", hour: 7, minute: 5, weekdays: [2]))
@@ -75,7 +75,7 @@ func reminderTests() {
     let revived = list.reminders.first { $0.id == past.id }!
     Check.that(revived.enabled && (revived.onceDate ?? .distantPast) > Date(), "re-enabling a rung one-time reminder → its next time")
 
-    Check.section("리마인더: 저장")
+    Check.section("알람: 저장")
     var record = legacyRecord()
     Check.that(record.reminders.isEmpty && record.alarmSoundName == AlarmSound.defaultName, "old record → no reminders, default alarm sound")
     record.reminders = [weekdays, snoozed, once]
