@@ -54,10 +54,18 @@ final class SpeechBubbleController {
     private var content: ((BubbleLayout) -> AnyView)?
     private var maxViewWidth: CGFloat = 0
     private var observers: [NSObjectProtocol] = []
-    /// Bumped on every show/hide so a stale fade-out never hides a newer bubble.
+    /// Bumped on every show/hide so a stale media load never touches a newer bubble.
     private var generation = 0
+    /// Our own fade-out, so show() can stop it. An `animator()` fade can't be cancelled:
+    /// it kept running after show() set alpha back to 1 and left the new bubble invisible.
+    private var fadeTimer: Timer?
+
+    private enum Constants {
+        static let fadeDuration: TimeInterval = 0.2
+    }
 
     deinit {
+        fadeTimer?.invalidate()
         detach()
         window.orderOut(nil)   // don't leave an invisible panel behind if we go away mid-fade
     }
@@ -100,24 +108,35 @@ final class SpeechBubbleController {
         hosting = view
 
         reposition()
+        stopFade()
         window.alphaValue = 1
         window.orderFrontRegardless()
     }
 
     func hide() {
         generation += 1
-        let token = generation
         detach()
         content = nil
-        let window = self.window
-        NSAnimationContext.runAnimationGroup({ ctx in
-            ctx.duration = 0.2
-            window.animator().alphaValue = 0
-        }, completionHandler: { [weak self] in
-            // Order out unless a newer show() reused the panel meanwhile.
-            guard self == nil || self?.generation == token else { return }
-            window.orderOut(nil)
-        })
+        stopFade()
+        guard window.isVisible else { return }
+
+        let start = Date()
+        let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] timer in
+            guard let self else { timer.invalidate(); return }
+            let progress = min(1, Date().timeIntervalSince(start) / Constants.fadeDuration)
+            self.window.alphaValue = 1 - progress
+            if progress >= 1 {
+                self.stopFade()
+                self.window.orderOut(nil)
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        fadeTimer = timer
+    }
+
+    private func stopFade() {
+        fadeTimer?.invalidate()
+        fadeTimer = nil
     }
 
     // MARK: - Following the pet
